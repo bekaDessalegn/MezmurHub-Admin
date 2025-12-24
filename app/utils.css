@@ -1,0 +1,76 @@
+/* Utility spacing and theme classes */
+.bg-light-gold {
+    background-color: var(--light-gold) !important;
+}
+
+.bg-white {
+    background-color: white !important;
+}
+
+.p-4 {
+    padding: 1rem;
+}
+
+.p-2 {
+    padding: 0.5rem;
+}
+
+.m-4 {
+    margin: 1rem;
+}
+
+.m-2 {
+    margin: 0.5rem;
+}
+
+.gap-2 {
+    gap: 0.5rem;
+}
+
+.gap-4 {
+    gap: 1rem;
+}
+
+.bg-primary {
+    background-color: var(--primary-gold) !important;
+}
+
+.text-primary {
+    color: var(--primary-gold) !important;
+}
+
+.border-primary {
+    border-color: var(--primary-gold) !important;
+}
+
+.bg-dark {
+    background-color: var(--dark-brown) !important;
+}
+
+.text-dark {
+    color: var(--dark-brown) !important;
+}
+
+.bg-cream {
+    background-color: var(--cream) !important;
+}
+
+.text-cream {
+    color: var(--cream) !important;
+}
+
+.bg-red {
+    background-color: var(--deep-red) !important;
+}
+
+.text-red {
+    color: var(--deep-red) !important;
+}
+
+.bg-green {
+    background-color: var(--rich-green) !important;
+}
+
+.text-green {
+    color: var(--rich-green) !important;
+}
