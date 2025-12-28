@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { doc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import { db, storage } from '@/lib/firebase';
 import { Song, SongFormData } from '@/lib/types';
 import SongForm from '@/components/SongForm';
@@ -59,23 +59,72 @@ export default function EditSongPage({ params }: { params: Promise<{ id: string 
 
     try {
       let audioUrl = data.audioUrl;
+      let thumbnailUrl = data.imageUrl;
 
       // Upload new audio file if provided
       if (data.audioFile) {
+        // Delete old audio file if exists
+        if (song?.audioUrl) {
+          try {
+            const oldAudioRef = ref(storage, song.audioUrl);
+            await deleteObject(oldAudioRef);
+          } catch (error) {
+            console.error('Error deleting old audio file:', error);
+          }
+        }
         const audioRef = ref(storage, `songs/${Date.now()}_${data.audioFile.name}`);
         await uploadBytes(audioRef, data.audioFile);
         audioUrl = await getDownloadURL(audioRef);
       }
 
+      // Handle image upload/removal
+      if (data.imageFile) {
+        // Upload new image file
+        // Delete old image file if exists
+        if (song?.thumbnailUrl) {
+          try {
+            const oldImageRef = ref(storage, song.thumbnailUrl);
+            await deleteObject(oldImageRef);
+          } catch (error) {
+            console.error('Error deleting old image file:', error);
+          }
+        }
+        const imageRef = ref(storage, `song-images/${Date.now()}_${data.imageFile.name}`);
+        await uploadBytes(imageRef, data.imageFile);
+        thumbnailUrl = await getDownloadURL(imageRef);
+      } else if (data.imageUrl === null && song?.thumbnailUrl) {
+        // Image was removed - delete old file
+        try {
+          const oldImageRef = ref(storage, song.thumbnailUrl);
+          await deleteObject(oldImageRef);
+        } catch (error) {
+          console.error('Error deleting old image file:', error);
+        }
+        thumbnailUrl = null;
+      } else {
+        // Keep existing image URL
+        thumbnailUrl = song?.thumbnailUrl || null;
+      }
+
       // Update song document
       const docRef = doc(db, 'songs', resolvedParams.id);
-      await updateDoc(docRef, {
+      const updateData: {
+        title: string;
+        lyrics: string;
+        categoryIds: string[];
+        audioUrl: string | null;
+        thumbnailUrl: string | null;
+        updatedAt: ReturnType<typeof serverTimestamp>;
+      } = {
         title: data.title,
         lyrics: data.lyrics,
         categoryIds: data.categoryIds,
-        audioUrl: audioUrl || null,
+        audioUrl: audioUrl !== undefined ? (audioUrl || null) : song?.audioUrl || null,
+        thumbnailUrl: thumbnailUrl,
         updatedAt: serverTimestamp(),
-      });
+      };
+
+      await updateDoc(docRef, updateData);
 
       toast.success('Song updated successfully!');
       router.push('/songs');
@@ -137,6 +186,7 @@ export default function EditSongPage({ params }: { params: Promise<{ id: string 
               lyrics: song.lyrics,
               categoryIds: song.categoryIds,
               audioUrl: song.audioUrl,
+              imageUrl: song.thumbnailUrl,
             }}
             onSubmit={handleSubmit}
             submitLabel="Update Song"

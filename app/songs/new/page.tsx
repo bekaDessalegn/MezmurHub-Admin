@@ -16,6 +16,7 @@ export default function NewSongPage() {
   async function handleSubmit(data: SongFormData) {
     try {
       let audioUrl = data.audioUrl;
+      let thumbnailUrl = data.imageUrl;
 
       // Upload audio file if provided
       if (data.audioFile) {
@@ -24,13 +25,20 @@ export default function NewSongPage() {
         audioUrl = await getDownloadURL(audioRef);
       }
 
+      // Upload image file if provided
+      if (data.imageFile) {
+        const imageRef = ref(storage, `song-images/${Date.now()}_${data.imageFile.name}`);
+        await uploadBytes(imageRef, data.imageFile);
+        thumbnailUrl = await getDownloadURL(imageRef);
+      }
+
       // Create song document
       await addDoc(collection(db, 'songs'), {
         title: data.title,
         lyrics: data.lyrics,
         categoryIds: data.categoryIds,
         audioUrl: audioUrl || null,
-        thumbnailUrl: null,
+        thumbnailUrl: thumbnailUrl || null,
         playCount: 0,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),

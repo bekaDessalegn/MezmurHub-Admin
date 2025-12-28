@@ -26,4 +26,24 @@ export interface SongFormData {
   categoryIds: string[];
   audioFile?: File | null;
   audioUrl?: string;
+  imageFile?: File | null;
+  imageUrl?: string | null;
+}
+
+export interface CreateSongData {
+  title: string;
+  lyrics: string;
+  categoryIds: string[];
+  audioUrl?: string | null;
+  thumbnailUrl?: string | null;
+}
+
+export interface UpdateSongData {
+  title?: string;
+  lyrics?: string;
+  categoryIds?: string[];
+  audioUrl?: string | null;
+  thumbnailUrl?: string | null;
+  playCount?: number;
+  metadata?: Record<string, unknown>;
 }

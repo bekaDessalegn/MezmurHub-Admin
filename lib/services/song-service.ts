@@ -84,7 +84,7 @@ export async function createSong(data: CreateSongData): Promise<string> {
 
 export async function updateSong(id: string, data: UpdateSongData): Promise<void> {
   const songRef = doc(db, SONGS_COLLECTION, id);
-  const updateData: any = {
+  const updateData = {
     ...data,
     updatedAt: Timestamp.now(),
   };
@@ -105,6 +105,16 @@ export async function deleteSong(id: string): Promise<void> {
     }
   }
 
+  // Delete image file if exists
+  if (song?.thumbnailUrl) {
+    try {
+      const imageRef = ref(storage, song.thumbnailUrl);
+      await deleteObject(imageRef);
+    } catch (error) {
+      console.error('Error deleting image file:', error);
+    }
+  }
+
   // Delete song document
   const songRef = doc(db, SONGS_COLLECTION, id);
   await deleteDoc(songRef);
@@ -113,6 +123,17 @@ export async function deleteSong(id: string): Promise<void> {
 export async function uploadAudioFile(file: File, songTitle: string): Promise<string> {
   const timestamp = Date.now();
   const fileName = `songs/${timestamp}_${file.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
+  const storageRef = ref(storage, fileName);
+
+  await uploadBytes(storageRef, file);
+  const downloadURL = await getDownloadURL(storageRef);
+
+  return downloadURL;
+}
+
+export async function uploadImageFile(file: File): Promise<string> {
+  const timestamp = Date.now();
+  const fileName = `song-images/${timestamp}_${file.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
   const storageRef = ref(storage, fileName);
 
   await uploadBytes(storageRef, file);

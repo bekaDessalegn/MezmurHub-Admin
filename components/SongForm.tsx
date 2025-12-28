@@ -5,7 +5,7 @@ import { collection, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Category, SongFormData } from '@/lib/types';
 import RichTextEditor from './RichTextEditor';
-import { Upload, X } from 'lucide-react';
+import { Upload, X, Image as ImageIcon } from 'lucide-react';
 
 interface SongFormProps {
   initialData?: Partial<SongFormData>;
@@ -19,9 +19,12 @@ export default function SongForm({ initialData, onSubmit, submitLabel }: SongFor
     lyrics: initialData?.lyrics || '',
     categoryIds: initialData?.categoryIds || [],
     audioUrl: initialData?.audioUrl,
+    imageUrl: initialData?.imageUrl,
   });
   const [categories, setCategories] = useState<Category[]>([]);
   const [audioFile, setAudioFile] = useState<File | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(initialData?.imageUrl || null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -76,6 +79,39 @@ export default function SongForm({ initialData, onSubmit, submitLabel }: SongFor
     setFormData(prev => ({ ...prev, audioUrl: undefined }));
   }
 
+  function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file type
+      const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+      if (!validTypes.includes(file.type)) {
+        alert('Please upload a valid image file (JPEG, PNG, or WebP)');
+        return;
+      }
+      
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        alert('Image size must be less than 5MB');
+        return;
+      }
+      
+      setImageFile(file);
+      
+      // Create preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  function removeImageFile() {
+    setImageFile(null);
+    setImagePreview(null);
+    setFormData(prev => ({ ...prev, imageUrl: null }));
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     
@@ -99,6 +135,7 @@ export default function SongForm({ initialData, onSubmit, submitLabel }: SongFor
       await onSubmit({
         ...formData,
         audioFile,
+        imageFile,
       });
     } finally {
       setLoading(false);
@@ -176,6 +213,90 @@ export default function SongForm({ initialData, onSubmit, submitLabel }: SongFor
                 </span>
               </label>
             ))}
+          </div>
+        )}
+      </div>
+
+      <div>
+        <label className="block text-sm font-semibold mb-2" style={{ color: '#3E2723' }}>
+          Song Image (Optional)
+        </label>
+        
+        {!imageFile && !imagePreview ? (
+          <div 
+            className="border-2 border-dashed rounded-2xl p-8 transition-all hover:border-solid"
+            style={{ borderColor: '#D4AF37', background: 'rgba(212, 175, 55, 0.05)' }}
+          >
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              className="hidden"
+              id="image-upload"
+            />
+            <label
+              htmlFor="image-upload"
+              className="flex flex-col items-center cursor-pointer"
+            >
+              <div 
+                className="rounded-full p-4 mb-3"
+                style={{ background: 'linear-gradient(135deg, #D4AF37 0%, #FFD700 100%)' }}
+              >
+                <ImageIcon className="h-8 w-8" style={{ color: '#3E2723' }} />
+              </div>
+              <span className="text-sm font-semibold" style={{ color: '#3E2723' }}>
+                Click to upload image
+              </span>
+              <span className="text-xs mt-1" style={{ color: '#3E2723', opacity: 0.6 }}>
+                JPEG, PNG, or WebP (Max 5MB)
+              </span>
+            </label>
+          </div>
+        ) : (
+          <div 
+            className="rounded-xl p-4 border-2"
+            style={{ background: '#FFFDD0', borderColor: '#D4AF37' }}
+          >
+            <div className="flex items-center gap-4">
+              {imagePreview && (
+                <div className="relative">
+                  <img
+                    src={imagePreview}
+                    alt="Song preview"
+                    className="w-24 h-24 object-cover rounded-lg"
+                  />
+                </div>
+              )}
+              <div className="flex-1">
+                <div className="flex items-center gap-3 mb-2">
+                  <div 
+                    className="rounded-full p-2"
+                    style={{ background: 'linear-gradient(135deg, #D4AF37 0%, #FFD700 100%)' }}
+                  >
+                    <ImageIcon className="h-5 w-5" style={{ color: '#3E2723' }} />
+                  </div>
+                  <span className="text-sm font-medium" style={{ color: '#3E2723' }}>
+                    {imageFile?.name || 'Existing image'}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={removeImageFile}
+                  className="text-xs px-3 py-1 rounded-lg transition-all"
+                  style={{ background: 'rgba(139, 0, 0, 0.1)', color: '#8B0000' }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = '#8B0000';
+                    e.currentTarget.style.color = 'white';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'rgba(139, 0, 0, 0.1)';
+                    e.currentTarget.style.color = '#8B0000';
+                  }}
+                >
+                  Remove Image
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </div>

@@ -161,6 +161,9 @@ export default function SongsPage() {
             <thead style={{ background: 'linear-gradient(135deg, rgba(212, 175, 55, 0.1) 0%, rgba(255, 215, 0, 0.1) 100%)' }}>
               <tr className="border-b-2" style={{ borderColor: '#D4AF37' }}>
                 <th className="px-8 py-5 text-left text-xs font-bold uppercase tracking-wider" style={{ color: '#3E2723' }}>
+                  Image
+                </th>
+                <th className="px-8 py-5 text-left text-xs font-bold uppercase tracking-wider" style={{ color: '#3E2723' }}>
                   Title
                 </th>
                 <th className="px-8 py-5 text-left text-xs font-bold uppercase tracking-wider" style={{ color: '#3E2723' }}>
@@ -186,6 +189,23 @@ export default function SongsPage() {
                   onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(212, 175, 55, 0.05)'}
                   onMouseLeave={(e) => e.currentTarget.style.background = 'white'}
                 >
+                  <td className="px-8 py-5">
+                    {song.thumbnailUrl ? (
+                      <img
+                        src={song.thumbnailUrl}
+                        alt={song.title}
+                        className="w-16 h-16 object-cover rounded-lg"
+                        style={{ border: '2px solid #D4AF37' }}
+                      />
+                    ) : (
+                      <div 
+                        className="w-16 h-16 rounded-lg flex items-center justify-center"
+                        style={{ background: 'rgba(212, 175, 55, 0.1)', border: '2px solid #D4AF37' }}
+                      >
+                        <Music className="h-8 w-8" style={{ color: '#D4AF37' }} />
+                      </div>
+                    )}
+                  </td>
                   <td className="px-8 py-5">
                     <div className="text-sm font-bold" style={{ color: '#3E2723' }}>
                       {song.title}
