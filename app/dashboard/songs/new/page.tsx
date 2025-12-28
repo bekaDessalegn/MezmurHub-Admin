@@ -65,8 +65,9 @@ export default function NewSongPage() {
 
       toast.success('Song created successfully!');
       router.push('/dashboard/songs');
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to create song');
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to create song';
+      toast.error(errorMessage);
       console.error(error);
     } finally {
       setLoading(false);
@@ -122,7 +123,6 @@ export default function NewSongPage() {
               <RichTextEditor
                 content={formData.lyrics}
                 onChange={(content) => setFormData({ ...formData, lyrics: content })}
-                placeholder="Enter song lyrics..."
               />
             </div>
 

@@ -89,8 +89,9 @@ export default function EditSongPage({ params }: { params: { id: string } }) {
 
       toast.success('Song updated successfully!');
       router.push('/dashboard/songs');
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to update song');
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to update song';
+      toast.error(errorMessage);
       console.error(error);
     } finally {
       setSaving(false);
@@ -161,7 +162,6 @@ export default function EditSongPage({ params }: { params: { id: string } }) {
               <RichTextEditor
                 content={formData.lyrics}
                 onChange={(content) => setFormData({ ...formData, lyrics: content })}
-                placeholder="Enter song lyrics..."
               />
             </div>
 
