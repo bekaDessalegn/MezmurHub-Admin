@@ -11,7 +11,7 @@ import {
   Timestamp,
 } from 'firebase/firestore';
 import { db } from '../firebase';
-import { Category, CreateCategoryData } from '../types';
+import { Category, CreateCategoryData, UpdateCategoryData } from '../types';
 
 const CATEGORIES_COLLECTION = 'categories';
 
@@ -69,10 +69,11 @@ export async function createCategory(data: CreateCategoryData): Promise<string> 
 
 export async function updateCategory(
   id: string,
-  data: Partial<CreateCategoryData>
+  data: UpdateCategoryData
 ): Promise<void> {
   const categoryRef = doc(db, CATEGORIES_COLLECTION, id);
-  await updateDoc(categoryRef, data);
+  const updateData: Record<string, unknown> = { ...data };
+  await updateDoc(categoryRef, updateData);
 }
 
 export async function deleteCategory(id: string): Promise<void> {

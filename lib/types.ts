@@ -8,7 +8,7 @@ export interface Song {
   playCount: number;
   createdAt: Date;
   updatedAt: Date;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface Category {
@@ -46,4 +46,18 @@ export interface UpdateSongData {
   thumbnailUrl?: string | null;
   playCount?: number;
   metadata?: Record<string, unknown>;
+}
+
+export interface CreateCategoryData {
+  name: string;
+  description?: string;
+  iconUrl?: string;
+  order?: number;
+}
+
+export interface UpdateCategoryData {
+  name?: string;
+  description?: string;
+  iconUrl?: string;
+  order?: number;
 }
